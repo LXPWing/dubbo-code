@@ -124,7 +124,7 @@ public class JdkCompiler extends AbstractCompiler {
         }
         return classLoader.loadClass(name);
     }
-
+    // 获取二进制流
     private static final class JavaFileObjectImpl extends SimpleJavaFileObject {
 
         private final CharSequence source;
@@ -167,7 +167,7 @@ public class JdkCompiler extends AbstractCompiler {
             return bytecode.toByteArray();
         }
     }
-
+    // 管理文件的读取和输出位置
     private static final class JavaFileManagerImpl extends ForwardingJavaFileManager<JavaFileManager> {
 
         private final ClassLoaderImpl classLoader;
@@ -249,7 +249,7 @@ public class JdkCompiler extends AbstractCompiler {
             return files;
         }
     }
-
+    // 类资源的加载
     private static final class ClassLoaderImpl extends ClassLoader {
 
         private final Map<String, JavaFileObject> classes = new HashMap<String, JavaFileObject>();

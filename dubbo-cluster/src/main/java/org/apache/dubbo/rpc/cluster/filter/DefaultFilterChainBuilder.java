@@ -38,7 +38,9 @@ public class DefaultFilterChainBuilder implements FilterChainBuilder {
         if (!filters.isEmpty()) {
             for (int i = filters.size() - 1; i >= 0; i--) {
                 final Filter filter = filters.get(i);
+                // 会把真是的Invoker（服务对象ref）放到拦截器的末尾
                 final Invoker<T> next = last;
+                // 为每个filter生成一个exporter，依次串起来
                 last = new FilterChainNode<>(originalInvoker, next, filter);
             }
         }

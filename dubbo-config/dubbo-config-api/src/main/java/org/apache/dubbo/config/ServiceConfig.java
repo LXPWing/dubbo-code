@@ -354,7 +354,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
                 this,
                 serviceMetadata
         );
-
+        // 获取当前服务对应的注册中心实例（如果没有显示指定服务注册中心，则默认使用全局配置的注册中心）
         List<URL> registryURLs = ConfigValidationUtils.loadRegistries(this, true);
 
         for (ProtocolConfig protocolConfig : protocols) {
@@ -363,19 +363,23 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
                     .orElse(path), group, version);
             // In case user specified path, register service one more time to map it to path.
             repository.registerService(pathKey, interfaceClass);
+            // 如果服务指定暴露多个协议(Dubbo,Rest),则依次暴露服务
             doExportUrlsFor1Protocol(protocolConfig, registryURLs);
         }
     }
 
 
     private void doExportUrlsFor1Protocol(ProtocolConfig protocolConfig, List<URL> registryURLs) {
+        // 读取其他配置信息到map，用于后续构造URL
         Map<String, String> map = buildAttributes(protocolConfig);
 
         //init serviceMetadata attachments
-        serviceMetadata.getAttachments().putAll(map);
+        serviceMetadata.getAttachments().putAll(map);                                                        
 
+        // 暴露服务
         URL url = buildUrl(protocolConfig, registryURLs, map);
 
+        // 暴露本地服务（local）/远程服务（remote） url的协议头不同
         exportUrl(url, registryURLs);
     }
 
@@ -512,6 +516,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
 
     private URL buildUrl(ProtocolConfig protocolConfig, List<URL> registryURLs, Map<String, String> params) {
         String name = protocolConfig.getName();
+        // 默认使用dubbo协议
         if (StringUtils.isEmpty(name)) {
             name = DUBBO;
         }
@@ -605,10 +610,13 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void doExportUrl(URL url, boolean withMetaData) {
+        // 通过动态代理将服务转换成Invoker
         Invoker<?> invoker = PROXY_FACTORY.getInvoker(ref, (Class) interfaceClass, url);
         if (withMetaData) {
+            // 服务暴露后向注册中心注册服务信息
             invoker = new DelegateProviderMetaDataInvoker(invoker, this);
         }
+        // 没有服务注册中心就直接暴露
         Exporter<?> exporter = PROTOCOL.export(invoker);
         exporters.add(exporter);
     }

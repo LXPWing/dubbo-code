@@ -283,8 +283,10 @@ public class DubboProtocol extends AbstractProtocol {
         URL url = invoker.getUrl();
 
         // export service.
+        // 根据服务分组，版本，接口和端口构造key
         String key = serviceKey(url);
         DubboExporter<T> exporter = new DubboExporter<T>(invoker, key, exporterMap);
+        // 把exporter存储到单例DubboProtocol中
         exporterMap.put(key, exporter);
 
         //export an stub service for dispatching event
@@ -300,7 +302,7 @@ public class DubboProtocol extends AbstractProtocol {
 
             }
         }
-
+        // 服务初次暴露会创建监听服务器
         openServer(url);
         optimizeSerialization(url);
 
@@ -346,6 +348,7 @@ public class DubboProtocol extends AbstractProtocol {
 
         ExchangeServer server;
         try {
+            // 创建NettyServer并且初始化Handler
             server = Exchangers.bind(url, requestHandler);
         } catch (RemotingException e) {
             throw new RpcException("Fail to start server(url: " + url + ") " + e.getMessage(), e);

@@ -91,7 +91,7 @@ public class DubboNamespaceHandler extends NamespaceHandlerSupport implements Co
         setSource(beanDefinition);
         return beanDefinition;
     }
-
+                                                                                   
     /**
      * Register the processors for the Spring Annotation-Driven features
      *

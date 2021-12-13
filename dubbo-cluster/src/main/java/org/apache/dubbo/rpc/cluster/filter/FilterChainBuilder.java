@@ -79,6 +79,7 @@ public interface FilterChainBuilder {
         public Result invoke(Invocation invocation) throws RpcException {
             Result asyncResult;
             try {
+                // 每次调用都会传递给下一个拦截器
                 asyncResult = filter.invoke(nextNode, invocation);
             } catch (Exception e) {
                 if (filter instanceof ListenableFilter) {

@@ -31,6 +31,7 @@ public interface Compiler {
      * @param classLoader classloader
      * @return Compiled class
      */
+    // 动态编译默认使用javassist
     Class<?> compile(String code, ClassLoader classLoader);
 
 }

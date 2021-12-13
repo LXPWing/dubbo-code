@@ -30,6 +30,8 @@ public abstract class AbstractCompiler implements Compiler {
 
     private static final Pattern CLASS_PATTERN = Pattern.compile("class\\s+([$_a-zA-Z][$_a-zA-Z0-9]*)\\s+");
 
+    // 正则匹配包路径，类名，再根据包路径、类名拼接出全路径类名
+    // 通过Class.forName加载该类并返回(防止重复编译)
     @Override
     public Class<?> compile(String code, ClassLoader classLoader) {
         code = code.trim();
@@ -49,6 +51,7 @@ public abstract class AbstractCompiler implements Compiler {
         }
         String className = pkg != null && pkg.length() > 0 ? pkg + "." + cls : cls;
         try {
+            // 通过Class.forName加载该类并返回(防止重复编译)
             return Class.forName(className, true, org.apache.dubbo.common.utils.ClassUtils.getCallerClassLoader(getClass()));
         } catch (ClassNotFoundException e) {
             if (!code.endsWith("}")) {
@@ -64,6 +67,7 @@ public abstract class AbstractCompiler implements Compiler {
         }
     }
 
+    // 由子类进行编译
     protected abstract Class<?> doCompile(String name, String source) throws Throwable;
 
 }

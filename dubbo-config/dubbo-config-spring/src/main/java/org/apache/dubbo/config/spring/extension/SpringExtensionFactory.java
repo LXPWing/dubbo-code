@@ -35,7 +35,7 @@ import java.util.Set;
  */
 public class SpringExtensionFactory implements ExtensionFactory, Lifecycle {
     private static final Logger logger = LoggerFactory.getLogger(SpringExtensionFactory.class);
-
+    // 用自动去重的set保存spring上下文
     private static final Set<ApplicationContext> CONTEXTS = new ConcurrentHashSet<ApplicationContext>();
 
     public static void addApplicationContext(ApplicationContext context) {
@@ -43,6 +43,7 @@ public class SpringExtensionFactory implements ExtensionFactory, Lifecycle {
         if (context instanceof ConfigurableApplicationContext) {
             ((ConfigurableApplicationContext) context).registerShutdownHook();
             // see https://github.com/apache/dubbo/issues/7093
+            // 优雅停机
             DubboShutdownHook.getDubboShutdownHook().unregister();
         }
     }
@@ -65,10 +66,12 @@ public class SpringExtensionFactory implements ExtensionFactory, Lifecycle {
     public <T> T getExtension(Class<T> type, String name) {
 
         //SPI should be get from SpiExtensionFactory
+        // spi注解的接口必须通过SpiExtensionFactory获得
         if (type.isInterface() && type.isAnnotationPresent(SPI.class)) {
             return null;
         }
 
+        // 获取普通的bean
         for (ApplicationContext context : CONTEXTS) {
             T bean = BeanFactoryUtils.getOptionalBean(context, name, type);
             if (bean != null) {

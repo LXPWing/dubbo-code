@@ -208,15 +208,18 @@ public class RegistryProtocol implements Protocol {
 
         providerUrl = overrideUrlWithConfig(providerUrl, overrideSubscribeListener);
         //export invoker
+        // 打开端口，把服务实例存储到map
         final ExporterChangeableWrapper<T> exporter = doLocalExport(originInvoker, providerUrl);
 
         // url to registry
+        // 创建注册中心实例 
         final Registry registry = getRegistry(registryUrl);
         final URL registeredProviderUrl = getUrlToRegistry(providerUrl, registryUrl);
 
         // decide if we need to delay publish
         boolean register = providerUrl.getParameter(REGISTER_KEY, true);
         if (register) {
+            // 服务暴露之后，注册服务元数据
             register(registry, registeredProviderUrl);
         }
 
@@ -228,6 +231,7 @@ public class RegistryProtocol implements Protocol {
         exporter.setSubscribeUrl(overrideSubscribeUrl);
 
         // Deprecated! Subscribe to override rules in 2.6.x or before.
+        // 监听服务接口下Configurators节点，用于处理动态配置
         registry.subscribe(overrideSubscribeUrl, overrideSubscribeListener);
 
         notifyExport(exporter);
@@ -799,12 +803,14 @@ public class RegistryProtocol implements Protocol {
 
             Registry registry = RegistryProtocol.this.getRegistry(getRegistryUrl(originInvoker));
             try {
+                // 移除已注册的元数据
                 registry.unregister(registerUrl);
             } catch (Throwable t) {
                 logger.warn(t.getMessage(), t);
             }
             try {
                 NotifyListener listener = RegistryProtocol.this.overrideListeners.remove(subscribeUrl);
+                // 去掉订阅配置监听器
                 registry.unsubscribe(subscribeUrl, listener);
                 if (ApplicationModel.getEnvironment().getConfiguration().convert(Boolean.class, org.apache.dubbo.registry.Constants.ENABLE_CONFIGURATION_LISTEN, true)) {
                     ExtensionLoader.getExtensionLoader(GovernanceRuleRepository.class).getDefaultExtension()
